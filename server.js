@@ -8,59 +8,53 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-/*
 /* DATABASE CONNECTION */
 
-const db = mysql.createConnection({
+const db = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  port: process.env.DB_PORT
+  port: Number(process.env.DB_PORT),
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
 });
 
-/* CONNECT DATABASE */
-
-db.connect((err) => {
+db.getConnection((err, connection) => {
   if (err) {
-    console.log("Database connection failed");
+    console.error("DB Connection Failed:", err.message);
   } else {
-    console.log("MySQL Connected");
+    console.log("MySQL Connected Successfully");
+    connection.release();
   }
 });
 
-/* API ROUTE */
+/* ROUTES */
+
 app.get("/", (req, res) => {
   res.send("Portfolio API is running...");
 });
 
 app.post("/contact", (req, res) => {
-
   const { name, email, message } = req.body;
 
   const sql =
     "INSERT INTO messages (name, email, message) VALUES (?, ?, ?)";
 
-  db.query(sql, [name, email, message], (err, result) => {
-
+  db.query(sql, [name, email, message], (err) => {
     if (err) {
-
-      res.json({
+      return res.json({
         status: "error",
         message: "Failed to save message"
       });
-
-    } else {
-
-      res.json({
-        status: "success",
-        message: "Message saved successfully!"
-      });
-
     }
 
+    res.json({
+      status: "success",
+      message: "Message saved successfully!"
+    });
   });
-
 });
 
 /* SERVER */
