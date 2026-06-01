@@ -1,4 +1,5 @@
-const express = require("express");
+
+require("dotenv").config();zconst express = require("express");
 const cors = require("cors");
 const mysql = require("mysql2");
 
