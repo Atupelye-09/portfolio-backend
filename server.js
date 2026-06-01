@@ -11,23 +11,23 @@ app.use(express.json());
 /* DATABASE CONNECTION */
 
 const db = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: Number(process.env.DB_PORT),
+  host: process.env.MYSQLHOST,
+  user: process.env.MYSQLUSER,
+  password: process.env.MYSQLPASSWORD,
+  database: process.env.MYSQLDATABASE,
+  port: Number(process.env.MYSQLPORT),
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
 });
 
 db.getConnection((err, connection) => {
   if (err) {
     console.error("DB Connection Failed:", err.message);
-  } else {
-    console.log("MySQL Connected Successfully");
-    connection.release();
+    return;
   }
+
+  console.log("MySQL Connected Successfully");
+  connection.release();
 });
 
 /* ROUTES */
@@ -61,6 +61,6 @@ app.post("/contact", (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on port ${PORT}`);
 });
